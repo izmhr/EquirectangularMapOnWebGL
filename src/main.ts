@@ -1,9 +1,11 @@
 import * as THREE from 'three';
 import $ from 'jquery';
+import * as dat from 'dat.gui';
 
 let scene: THREE.Scene;
 
 $(() => {
+  addGui();
   GetCamera();
   // レンダラーを作成
   const renderer = new THREE.WebGLRenderer();
@@ -79,4 +81,14 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
   var plane = new THREE.Mesh(geometry, material);
 
   scene.add(plane);
+}
+
+class FizzyText {
+  message: string = 'dat.gui';
+}
+
+const addGui = function(): void {
+  const text = new FizzyText();
+  const gui = new dat.GUI();
+  gui.add(text, 'message');
 }
