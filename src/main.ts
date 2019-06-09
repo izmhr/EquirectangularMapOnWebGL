@@ -75,11 +75,26 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
   texture.format = THREE.RGBFormat;
 
   var geometry = new THREE.PlaneGeometry(800,400);
-  var mat = new THREE.MeshBasicMaterial({
-    color: 0xffffff, side: THREE.FrontSide,
-    map: texture
-  });
-  var plane = new THREE.Mesh(geometry, mat);
+  // var mat = new THREE.MeshBasicMaterial({
+  //   color: 0xffffff, side: THREE.FrontSide,
+  //   map: texture
+  // });
+
+  // https://nogson2.hatenablog.com/entry/2017/09/29/185126
+    var uniforms = {
+    uTex: {type: "t", value: texture }
+    // u_time: { type: "f", value: 1.0 },
+    // u_resolution: { type: "v2", value: new THREE.Vector2() },
+    // u_mouse: { type: "v2", value: new THREE.Vector2() }
+  };
+
+  var material = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: <string>$("#vertexShader").text(),
+      fragmentShader:  <string>$("#fragmentShader").text(),
+    });
+  var plane = new THREE.Mesh(geometry, material);
+  plane.position.z = -5;
 
   scene.add(plane);
 }

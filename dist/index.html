@@ -3,6 +3,23 @@
 
 <head>
   <meta charset="UTF-8" />
+  <script id="vertexShader" type="x-shader/x-vertex">
+    varying vec2 vUv;
+    
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    }
+  </script>
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    precision mediump float;
+    uniform sampler2D uTex;
+    varying vec2 vUv;
+
+    void main() {
+      gl_FragColor = texture2D(uTex,vUv);
+    }
+  </script>
   <script defer src="main.js"></script>
 </head>
 
