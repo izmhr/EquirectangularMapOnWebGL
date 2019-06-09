@@ -3,13 +3,12 @@ import $ from 'jquery';
 
 let scene: THREE.Scene;
 
-// window.addEventListener('DOMContentLoaded', () => {
 $(() => {
   GetCamera();
   // レンダラーを作成
   const renderer = new THREE.WebGLRenderer();
   // レンダラーのサイズを設定
-  renderer.setSize(800, 600);
+  renderer.setSize(1600, 800);
   // canvasをbodyに追加
   document.body.appendChild(renderer.domElement);
 
@@ -17,26 +16,11 @@ $(() => {
   scene = new THREE.Scene();
 
   // カメラを作成
-  const camera = new THREE.PerspectiveCamera(45, 800 / 600, 1, 10000);
+  const camera = new THREE.OrthographicCamera(-1504, 1504, 752, -752);
   camera.position.set(0, 0, 1000);
-
-  // 箱を作成
-  const geometry = new THREE.BoxGeometry(250, 250, 250);
-  const material = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-  const box = new THREE.Mesh(geometry, material);
-  box.position.z = -5;
-  scene.add(box);
-
-  // 平行光源を生成
-  const light = new THREE.DirectionalLight(0xffffff);
-  light.position.set(1, 1, 1);
-  scene.add(light);
 
   const tick = (): void => {
     requestAnimationFrame(tick);
-
-    box.rotation.x += 0.05;
-    box.rotation.y += 0.05;
 
     // 描画
     renderer.render(scene, camera);
@@ -74,18 +58,17 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
   texture.magFilter = THREE.LinearFilter;
   texture.format = THREE.RGBFormat;
 
-  var geometry = new THREE.PlaneGeometry(800,400);
-  // var mat = new THREE.MeshBasicMaterial({
-  //   color: 0xffffff, side: THREE.FrontSide,
-  //   map: texture
-  // });
+  var geometry = new THREE.PlaneGeometry(3008,1504);
 
   // https://nogson2.hatenablog.com/entry/2017/09/29/185126
-    var uniforms = {
-    uTex: {type: "t", value: texture }
-    // u_time: { type: "f", value: 1.0 },
-    // u_resolution: { type: "v2", value: new THREE.Vector2() },
-    // u_mouse: { type: "v2", value: new THREE.Vector2() }
+  // https://gist.github.com/izmhr/aa0c05d96c8182bcfbf7ce70ec43b4f7
+  var uniforms = {
+    uTex: {type: "t", value: texture },
+    _UVOffset: {type: "v4", value: new THREE.Vector4(0.0, -0.006, 0.005, -0.005)},
+    _RotFront: {type: "f", value: 1.53},
+    _RotBack: {type: "f", value: -1.41},
+    _RadiusFront: {type: "f", value: 0.441},
+    _RadiusBack: {type: "f", value: 0.483},
   };
 
   var material = new THREE.ShaderMaterial({
@@ -94,7 +77,6 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
       fragmentShader:  <string>$("#fragmentShader").text(),
     });
   var plane = new THREE.Mesh(geometry, material);
-  plane.position.z = -5;
 
   scene.add(plane);
 }
