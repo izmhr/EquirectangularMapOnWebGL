@@ -13,6 +13,10 @@ module.exports = {
         test: /\.ts$/,
         // TypeScript をコンパイルする
         use: "ts-loader"
+      },
+      {
+        test: /\.(glsl|vs|fs)$/,
+        use: "shader-loader"
       }
     ]
   },

@@ -1,6 +1,10 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import * as dat from 'dat.gui';
+// about loading shader code when using typescript.
+// https://github.com/ryokomy/ts-webpack-threejs-shader-template
+const simplevert: string = require('./shader/simple.vs').default;
+const Ds2Erfrag: string = require('./shader/Ds2Er.fs').default;
 
 let scene: THREE.Scene;
 
@@ -75,8 +79,8 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
 
   var material = new THREE.ShaderMaterial({
       uniforms: uniforms,
-      vertexShader: <string>$("#vertexShader").text(),
-      fragmentShader:  <string>$("#fragmentShader").text(),
+      vertexShader: simplevert,
+      fragmentShader: Ds2Erfrag
     });
   var plane = new THREE.Mesh(geometry, material);
 
