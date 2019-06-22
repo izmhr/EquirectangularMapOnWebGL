@@ -8,8 +8,8 @@ import SSS from './sub';
 
 // about loading shader code when using typescript.
 // https://github.com/ryokomy/ts-webpack-threejs-shader-template
-const simplevert: string = require('./shader/simple.vs').default;
-const Ds2Erfrag: string = require('./shader/Ds2Er.fs').default;
+const simplevert: string = require('./shader/simple.vs');
+const Ds2Erfrag: string = require('./shader/Ds2Er.fs');
 
 let scene: THREE.Scene;
 
