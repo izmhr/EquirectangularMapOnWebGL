@@ -1,6 +1,11 @@
 import * as THREE from 'three';
 import $ from 'jquery';
 import * as dat from 'dat.gui';
+
+// Checking
+import * as Sub from './sub';
+import SSS from './sub';
+
 // about loading shader code when using typescript.
 // https://github.com/ryokomy/ts-webpack-threejs-shader-template
 const simplevert: string = require('./shader/simple.vs').default;
@@ -34,12 +39,15 @@ $(() => {
   tick();
 
   console.log('Hello Three.js');
+
+  // Checking Typescript + Webpack Basic import technic.
+  CheckImportOnWPandTS();
 });
 
 const GetCamera = function (): void {
   const constraints: MediaStreamConstraints =
   {
-    video: {width: 3008, height: 1504}
+    video: { width: 3008, height: 1504 }
   }
   navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
     // Success
@@ -64,34 +72,42 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
   texture.magFilter = THREE.LinearFilter;
   texture.format = THREE.RGBFormat;
 
-  var geometry = new THREE.PlaneGeometry(3008,1504);
+  var geometry = new THREE.PlaneGeometry(3008, 1504);
 
   // https://nogson2.hatenablog.com/entry/2017/09/29/185126
   // https://gist.github.com/izmhr/aa0c05d96c8182bcfbf7ce70ec43b4f7
   var uniforms = {
-    uTex: {type: "t", value: texture },
-    _UVOffset: {type: "v4", value: new THREE.Vector4(0.0, -0.006, 0.005, -0.005)},
-    _RotFront: {type: "f", value: 1.53},
-    _RotBack: {type: "f", value: -1.41},
-    _RadiusFront: {type: "f", value: 0.441},
-    _RadiusBack: {type: "f", value: 0.483},
+    uTex: { type: "t", value: texture },
+    _UVOffset: { type: "v4", value: new THREE.Vector4(0.0, -0.006, 0.005, -0.005) },
+    _RotFront: { type: "f", value: 1.53 },
+    _RotBack: { type: "f", value: -1.41 },
+    _RadiusFront: { type: "f", value: 0.441 },
+    _RadiusBack: { type: "f", value: 0.483 },
   };
 
   var material = new THREE.ShaderMaterial({
-      uniforms: uniforms,
-      vertexShader: simplevert,
-      fragmentShader: Ds2Erfrag
-    });
+    uniforms: uniforms,
+    vertexShader: simplevert,
+    fragmentShader: Ds2Erfrag
+  });
   var plane = new THREE.Mesh(geometry, material);
 
   scene.add(plane);
+}
+
+const CheckImportOnWPandTS = function (): void {
+  Sub.Foo();
+  Sub.Boo();
+  const sss = new SSS();
+  console.log("calc: ", sss.Add(999, 1));
+  const sss2 = new Sub.default(); // こういうimportの仕方もあるけどまぁ不要でしょう
 }
 
 class FizzyText {
   message: string = 'dat.gui';
 }
 
-const addGui = function(): void {
+const addGui = function (): void {
   const text = new FizzyText();
   const gui = new dat.GUI();
   gui.add(text, 'message');
