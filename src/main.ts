@@ -11,10 +11,24 @@ import SSS from './sub';
 const simplevert: string = require('./shader/simple.vs');
 const Ds2Erfrag: string = require('./shader/Ds2Er.fs');
 
+class Ds2ErFragUniforms {
+  UVOffset_FU: number = 0.0; //Front, U
+  UVOffset_FV: number = -0.006; //Front, V
+  UVOffset_BU: number = 0.005; //Back, U
+  UVOffset_BV: number = -0.005; //Back, V
+  // UVOffset: THREE.Vector4 = new THREE.Vector4(0.0, -0.006, 0.005, -0.005);
+  RotFront: number = 1.53;
+  RotBack: number = -1.41;
+  RadiusFront: number = 0.441;
+  RadiusBack: number = 0.483;
+}
+
 let scene: THREE.Scene;
+let erPlane: THREE.Mesh;
+const shaderUniforms = new Ds2ErFragUniforms();
 
 $(() => {
-  addGui();
+  AddGui();
   GetCamera();
   // レンダラーを作成
   const renderer = new THREE.WebGLRenderer();
@@ -33,6 +47,7 @@ $(() => {
   const tick = (): void => {
     requestAnimationFrame(tick);
 
+    UpdateFragShaderUniforms();
     // 描画
     renderer.render(scene, camera);
   };
@@ -60,13 +75,14 @@ const GetCamera = function (): void {
       $resolution.text("Raw " + video.videoWidth + " x " + video.videoHeight);
     }, 500);
 
-    MakeVideoTexture(video);
+    erPlane = MakeVideoTexture(video);
+    scene.add(erPlane);
   }).catch((error) => {
     console.log("camera not found");
   });
 }
 
-const MakeVideoTexture = function (video: HTMLVideoElement): void {
+const MakeVideoTexture = function (video: HTMLVideoElement): THREE.Mesh {
   const texture = new THREE.VideoTexture(video);
   texture.minFilter = THREE.LinearFilter;
   texture.magFilter = THREE.LinearFilter;
@@ -90,9 +106,7 @@ const MakeVideoTexture = function (video: HTMLVideoElement): void {
     vertexShader: simplevert,
     fragmentShader: Ds2Erfrag
   });
-  var plane = new THREE.Mesh(geometry, material);
-
-  scene.add(plane);
+  return new THREE.Mesh(geometry, material);
 }
 
 const CheckImportOnWPandTS = function (): void {
@@ -103,12 +117,27 @@ const CheckImportOnWPandTS = function (): void {
   const sss2 = new Sub.default(); // こういうimportの仕方もあるけどまぁ不要でしょう
 }
 
-class FizzyText {
-  message: string = 'dat.gui';
+const AddGui = function (): void {
+  const gui = new dat.GUI();
+  gui.useLocalStorage = true;
+  gui.remember(shaderUniforms);
+  gui.add(shaderUniforms, 'UVOffset_FU', -0.1, 0.1);
+  gui.add(shaderUniforms, 'UVOffset_FV', -0.1, 0.1);
+  gui.add(shaderUniforms, 'UVOffset_BU', -0.1, 0.1);
+  gui.add(shaderUniforms, 'UVOffset_BV', -0.1, 0.1);
+  gui.add(shaderUniforms, 'RotFront', -3.1415, 3.1415);
+  gui.add(shaderUniforms, 'RotBack', -3.1415, 3.1415);
+  gui.add(shaderUniforms, 'RadiusFront', 0.43, 0.5);
+  gui.add(shaderUniforms, 'RadiusBack', 0.43, 0.5);
 }
 
-const addGui = function (): void {
-  const text = new FizzyText();
-  const gui = new dat.GUI();
-  gui.add(text, 'message');
+const UpdateFragShaderUniforms = function (): void {
+  if(erPlane == undefined) return;
+  
+  const _uniforms = (<THREE.ShaderMaterial>(erPlane.material)).uniforms;
+  _uniforms._UVOffset.value = new THREE.Vector4(shaderUniforms.UVOffset_FU, shaderUniforms.UVOffset_FV, shaderUniforms.UVOffset_BU, shaderUniforms.UVOffset_BV);
+  _uniforms._RotFront.value = shaderUniforms.RotFront;
+  _uniforms._RotBack.value = shaderUniforms.RotBack;
+  _uniforms._RadiusFront.value = shaderUniforms.RadiusFront;
+  _uniforms._RadiusBack.value = shaderUniforms.RadiusBack;
 }
