@@ -9,23 +9,36 @@ import SSS from './sub';
 // about loading shader code when using typescript.
 // https://github.com/ryokomy/ts-webpack-threejs-shader-template
 const simplevert: string = require('./shader/simple.vs');
-const Ds2Erfrag: string = require('./shader/Ds2Er.fs');
+// const Ds2Erfrag: string = require('./shader/Ds2Er.fs');
+const Ds2Erfrag: string = require('./shader/Ds2Er2.fs');
 
-class Ds2ErFragUniforms {
-  UVOffset_FU: number = 0.0; //Front, U
-  UVOffset_FV: number = -0.006; //Front, V
-  UVOffset_BU: number = 0.005; //Back, U
-  UVOffset_BV: number = -0.005; //Back, V
-  // UVOffset: THREE.Vector4 = new THREE.Vector4(0.0, -0.006, 0.005, -0.005);
-  RotFront: number = 1.53;
-  RotBack: number = -1.41;
-  RadiusFront: number = 0.441;
-  RadiusBack: number = 0.483;
+// class Ds2ErFragUniforms {
+//   UVOffset_FU: number = 0.0; //Front, U
+//   UVOffset_FV: number = -0.006; //Front, V
+//   UVOffset_BU: number = 0.005; //Back, U
+//   UVOffset_BV: number = -0.005; //Back, V
+//   // UVOffset: THREE.Vector4 = new THREE.Vector4(0.0, -0.006, 0.005, -0.005);
+//   RotFront: number = 1.53;
+//   RotBack: number = -1.41;
+//   RadiusFront: number = 0.441;
+//   RadiusBack: number = 0.483;
+// }
+class Ds2Er2FragUniforms {
+  FOV: number = 200;
+  CenterShiftX: number = 0.0;
+  CenterShiftY: number = 0.0;
+  TextureSizeW: number = 3008;
+  TextureSizeH: number = 1504;
+  RotA: number = 0;
+  RotB: number = 0;
+  FisheyeDiameterOnTextureInPixel: number = 1504;
+  SigmoidCoeof: number = 30;
 }
 
 let scene: THREE.Scene;
 let erPlane: THREE.Mesh;
-const shaderUniforms = new Ds2ErFragUniforms();
+// const shaderUniforms = new Ds2ErFragUniforms();
+const shaderUniforms = new Ds2Er2FragUniforms();
 
 $(() => {
   AddGui();
@@ -94,11 +107,15 @@ const MakeVideoTexture = function (video: HTMLVideoElement): THREE.Mesh {
   // https://gist.github.com/izmhr/aa0c05d96c8182bcfbf7ce70ec43b4f7
   var uniforms = {
     uTex: { type: "t", value: texture },
-    _UVOffset: { type: "v4", value: new THREE.Vector4(0.0, -0.006, 0.005, -0.005) },
-    _RotFront: { type: "f", value: 1.53 },
-    _RotBack: { type: "f", value: -1.41 },
-    _RadiusFront: { type: "f", value: 0.441 },
-    _RadiusBack: { type: "f", value: 0.483 },
+    _FOV: {type: "f", value: 200},
+    _CenterShiftX: {type: "f", value: 0},
+    _CenterShiftY: {type: "f", value: 0},
+    _TextureSizeW: {type: "f", value: 3008},
+    _TextureSizeH: {type: "f", value: 1504},
+    _RotA: {type: "f", value: 0},
+    _RotB: {type: "f", value: 0},
+    _FisheyeDiameterOnTextureInPixel: {type: "f", value: 1504},
+    _SigmoidCoef: {type: "f", value: 30},
   };
 
   var material = new THREE.ShaderMaterial({
@@ -117,27 +134,57 @@ const CheckImportOnWPandTS = function (): void {
   const sss2 = new Sub.default(); // こういうimportの仕方もあるけどまぁ不要でしょう
 }
 
+// const AddGui = function (): void {
+//   const gui = new dat.GUI();
+//   gui.useLocalStorage = true;
+//   gui.remember(shaderUniforms);
+//   gui.add(shaderUniforms, 'UVOffset_FU', -0.1, 0.1);
+//   gui.add(shaderUniforms, 'UVOffset_FV', -0.1, 0.1);
+//   gui.add(shaderUniforms, 'UVOffset_BU', -0.1, 0.1);
+//   gui.add(shaderUniforms, 'UVOffset_BV', -0.1, 0.1);
+//   gui.add(shaderUniforms, 'RotFront', -3.1415, 3.1415);
+//   gui.add(shaderUniforms, 'RotBack', -3.1415, 3.1415);
+//   gui.add(shaderUniforms, 'RadiusFront', 0.43, 0.5);
+//   gui.add(shaderUniforms, 'RadiusBack', 0.43, 0.5);
+// }
+
 const AddGui = function (): void {
   const gui = new dat.GUI();
   gui.useLocalStorage = true;
   gui.remember(shaderUniforms);
-  gui.add(shaderUniforms, 'UVOffset_FU', -0.1, 0.1);
-  gui.add(shaderUniforms, 'UVOffset_FV', -0.1, 0.1);
-  gui.add(shaderUniforms, 'UVOffset_BU', -0.1, 0.1);
-  gui.add(shaderUniforms, 'UVOffset_BV', -0.1, 0.1);
-  gui.add(shaderUniforms, 'RotFront', -3.1415, 3.1415);
-  gui.add(shaderUniforms, 'RotBack', -3.1415, 3.1415);
-  gui.add(shaderUniforms, 'RadiusFront', 0.43, 0.5);
-  gui.add(shaderUniforms, 'RadiusBack', 0.43, 0.5);
+  gui.add(shaderUniforms, 'FOV', 90, 270);
+  gui.add(shaderUniforms, 'CenterShiftX', -1, 1, 0.01);
+  gui.add(shaderUniforms, 'CenterShiftY', -1, 1, 0.01);
+  gui.add(shaderUniforms, 'TextureSizeW');
+  gui.add(shaderUniforms, 'TextureSizeH');
+  gui.add(shaderUniforms, 'RotA', -3.1415, 3.1415, 0.01);
+  gui.add(shaderUniforms, 'RotB', -3.1415, 3.1415, 0.01);
+  gui.add(shaderUniforms, 'FisheyeDiameterOnTextureInPixel');
+  gui.add(shaderUniforms, 'SigmoidCoeof', 0, 50, 2);
 }
+
+// const UpdateFragShaderUniforms = function (): void {
+//   if(erPlane == undefined) return;
+  
+//   const _uniforms = (<THREE.ShaderMaterial>(erPlane.material)).uniforms;
+//   _uniforms._UVOffset.value = new THREE.Vector4(shaderUniforms.UVOffset_FU, shaderUniforms.UVOffset_FV, shaderUniforms.UVOffset_BU, shaderUniforms.UVOffset_BV);
+//   _uniforms._RotFront.value = shaderUniforms.RotFront;
+//   _uniforms._RotBack.value = shaderUniforms.RotBack;
+//   _uniforms._RadiusFront.value = shaderUniforms.RadiusFront;
+//   _uniforms._RadiusBack.value = shaderUniforms.RadiusBack;
+// }
 
 const UpdateFragShaderUniforms = function (): void {
   if(erPlane == undefined) return;
   
   const _uniforms = (<THREE.ShaderMaterial>(erPlane.material)).uniforms;
-  _uniforms._UVOffset.value = new THREE.Vector4(shaderUniforms.UVOffset_FU, shaderUniforms.UVOffset_FV, shaderUniforms.UVOffset_BU, shaderUniforms.UVOffset_BV);
-  _uniforms._RotFront.value = shaderUniforms.RotFront;
-  _uniforms._RotBack.value = shaderUniforms.RotBack;
-  _uniforms._RadiusFront.value = shaderUniforms.RadiusFront;
-  _uniforms._RadiusBack.value = shaderUniforms.RadiusBack;
+  _uniforms._FOV.value = shaderUniforms.FOV;
+  _uniforms._CenterShiftX.value = shaderUniforms.CenterShiftX;
+  _uniforms._CenterShiftY.value = shaderUniforms.CenterShiftY;
+  _uniforms._TextureSizeW.value = shaderUniforms.TextureSizeW;
+  _uniforms._TextureSizeH.value = shaderUniforms.TextureSizeH;
+  _uniforms._RotA.value = shaderUniforms.RotA;
+  _uniforms._RotB.value = shaderUniforms.RotB;
+  _uniforms._FisheyeDiameterOnTextureInPixel.value = shaderUniforms.FisheyeDiameterOnTextureInPixel;
+  _uniforms._SigmoidCoef.value = shaderUniforms.SigmoidCoeof;
 }
