@@ -19,6 +19,11 @@
 
 ## Reference
 
+### NEW VERSION
+
+* [Original Article : Converting dual fisheye images into a spherical (equirectangular) projection](http://paulbourke.net/dome/dualfish2sphere/)
+
+### OLD VERSION
 * [Original Shader Code](http://stereoarts.jp/) is written by [@Stereoarts](https://twitter.com/Stereoarts). That is originally for Ricoh THETA S and Unity.
 * And [@hammmm](https://twitter.com/hammmm) [customed it for Insta360 Air.](http://hammmm.hatenablog.com/entry/2017/06/01/022127)
 * My work is translated them to GLSL shader.
